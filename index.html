@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Omnexa Wash | أومنيسكا لغسيل السيارات المتنقل والمغاسل الشريكة</title>
+  <meta name="description" content="عناية فائقة بسيارتك عند باب بيتك ومقر عملك في جميع أنحاء المملكة العربية السعودية. احجز الآن أسرع وأرقى خدمة غسيل سيارات متنقلة.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0B132B',
+              slate: '#1C2541',
+              blue: '#0284C7',
+              cyan: '#06B6D4',
+              emerald: '#10B981',
+              amber: '#F59E0B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS for Interactive Saudi Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti for Celebration Feedback -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none w-full max-w-md px-4"></div>
+
+  <!-- Top Demo Role Bar -->
+  <div id="demoRoleBar" class="bg-slate-900 border-b border-slate-800 text-slate-200"></div>
+
+  <!-- Outer Simulation Shell (Transforms into realistic phone frame when Mobile Simulator is toggled) -->
+  <div id="appSimulationWrapper" class="w-full flex-1 flex flex-col bg-slate-50 transition-all duration-300">
+    
+    <!-- Phone Notch & Status Bar (Visible only in Mobile Simulator Mode) -->
+    <div class="hidden mobile-device-frame:block mobile-notch">
+      <div class="mobile-speaker-bar"></div>
+      <div class="mobile-camera-dot"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          
+          <!-- Logo & Brand -->
+          <div class="flex items-center gap-3 cursor-pointer" onclick="window.OmnexaApp.navigateTo('home')">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-900 via-sky-700 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-600/20 text-white font-black text-xl">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <div>
+              <span class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 flex items-center gap-1.5">
+                OMNEXA <span class="text-sky-600 font-extrabold text-sm sm:text-base px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-200/60">WASH</span>
+              </span>
+              <p class="text-[11px] text-slate-500 font-medium hidden sm:block">عناية فائقة بسيارتك عند باب بيتك ومقر عملك</p>
+            </div>
+          </div>
+
+          <!-- Desktop Navigation Links -->
+          <nav class="hidden lg:flex items-center gap-1 text-sm font-semibold text-slate-600">
+            <a href="#" data-nav-target="home" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100 text-sky-600 font-bold bg-sky-50">الرئيسية</a>
+            <a href="#" data-nav-target="booking" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100">احجز موعد</a>
+            <a href="#" data-nav-target="nearby" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100 flex items-center gap-1.5">
+              <span>المغاسل والكباتن</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            </a>
+            <a href="#" data-nav-target="tracking" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100 flex items-center gap-1.5 text-sky-700">
+              <i data-lucide="navigation" class="w-4 h-4"></i>
+              <span>تتبع طلبي</span>
+            </a>
+            <a href="#" data-nav-target="orders" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100">طلباتي السابقة</a>
+            <a href="#" data-nav-target="garage" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100">سياراتي</a>
+            <a href="#" data-nav-target="profile" class="px-3.5 py-2 rounded-xl transition hover:bg-slate-100">حسابي</a>
+          </nav>
+
+          <!-- Top Actions -->
+          <div class="flex items-center gap-2 sm:gap-3">
+            
+            <!-- Language Switcher -->
+            <button onclick="window.OmnexaApp.setLanguage(window.omnexaState.lang === 'ar' ? 'en' : 'ar')" 
+              class="px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="globe" class="w-4 h-4 text-slate-500"></i>
+              <span id="langToggleText">English</span>
+            </button>
+
+            <!-- Device Simulator Toggle (Desktop / Mobile Frame) -->
+            <button onclick="window.OmnexaApp.toggleDeviceSimulator()" 
+              title="التبديل بين شاشة الجوال وسطح المكتب"
+              class="hidden sm:flex px-3 py-2 rounded-xl border border-sky-200 bg-sky-50/70 hover:bg-sky-100 text-sky-800 text-xs font-bold transition items-center gap-1.5 shadow-sm">
+              <i data-lucide="smartphone" class="w-4 h-4 text-sky-600"></i>
+              <span id="simToggleText">محاكي الجوال</span>
+            </button>
+
+            <!-- Primary Booking Button -->
+            <button onclick="window.OmnexaApp.navigateTo('booking')" 
+              class="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 text-white font-black text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl shadow-lg shadow-sky-600/25 flex items-center gap-2 transition active:scale-95">
+              <span>احجز الآن</span>
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Navigation Bar (App Experience) -->
+      <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 flex items-center justify-around shadow-2xl">
+        <button data-nav-target="home" class="flex flex-col items-center gap-1 text-[11px] font-bold text-sky-600 py-1">
+          <i data-lucide="home" class="w-5 h-5"></i>
+          <span>الرئيسية</span>
+        </button>
+        <button data-nav-target="booking" class="flex flex-col items-center gap-1 text-[11px] font-semibold text-slate-500 py-1">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          <span>حجز جديد</span>
+        </button>
+        <button data-nav-target="tracking" class="flex flex-col items-center gap-1 text-[11px] font-semibold text-slate-500 py-1 relative">
+          <span class="absolute top-0 right-2 w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+          <i data-lucide="map-pin" class="w-5 h-5 text-sky-600"></i>
+          <span>التتبع</span>
+        </button>
+        <button data-nav-target="orders" class="flex flex-col items-center gap-1 text-[11px] font-semibold text-slate-500 py-1">
+          <i data-lucide="clock" class="w-5 h-5"></i>
+          <span>الطلبات</span>
+        </button>
+        <button data-nav-target="profile" class="flex flex-col items-center gap-1 text-[11px] font-semibold text-slate-500 py-1">
+          <i data-lucide="user" class="w-5 h-5"></i>
+          <span>حسابي</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN VIEWS CONTAINER -->
+    <main class="flex-1 pb-20 lg:pb-12">
+      
+      <!-- ========================================== -->
+      <!-- VIEW 1: HOME & LANDING PAGE -->
+      <!-- ========================================== -->
+      <section id="view-home" class="view-section">
+        
+        <!-- Hero Section -->
+        <div class="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
+          <!-- Ambient glowing gradients -->
+          <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute top-1/3 right-10 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="max-w-7xl mx-auto relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              
+              <!-- Hero Content -->
+              <div class="lg:col-span-7 space-y-6 text-right">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-bold">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                  <span>الخدمة الأولى المعتمدة لغسيل السيارات المتنقل بالمملكة 🇸🇦</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+                  غسيل سيارتك الاحترافي يصلك <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-teal-300">أينما كنت</span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
+                  لا مزيد من إضاعة الوقت في طوابير الانتظار. كباتن أومنيسكا يصلون إلى باب بيتك أو مواقف عملك بشاحنات مجهزة بخزانات ماء مقطر نقي، ومولدات صامتة، ومواد نانو سيراميك إيطالية تحافظ على بريق سيارتك.
+                </p>
+
+                <!-- Key Metrics & Trust Badges -->
+                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800 max-w-lg">
+                  <div>
+                    <strong class="text-2xl sm:text-3xl font-black text-white block">+140,000</strong>
+                    <span class="text-xs text-slate-400 font-medium">سيارة مغسولة برضا تام</span>
+                  </div>
+                  <div>
+                    <strong class="text-2xl sm:text-3xl font-black text-amber-400 block">4.95 ★</strong>
+                    <span class="text-xs text-slate-400 font-medium">أعلى تقييم عملاء موثق</span>
+                  </div>
+                  <div>
+                    <strong class="text-2xl sm:text-3xl font-black text-sky-400 block">35 دقيقة</strong>
+                    <span class="text-xs text-slate-400 font-medium">متوسط وصول الكابتن</span>
+                  </div>
+                </div>
+
+                <!-- CTA Action Buttons -->
+                <div class="flex flex-wrap items-center gap-4 pt-4">
+                  <button onclick="window.OmnexaApp.navigateTo('booking')" class="bg-gradient-to-r from-sky-500 to-cyan-400 hover:from-sky-600 hover:to-cyan-500 text-slate-950 font-black px-8 py-4 rounded-2xl shadow-xl shadow-cyan-500/20 text-base transition transform active:scale-95 flex items-center gap-3">
+                    <span>احجز موعد غسيل الآن</span>
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                  </button>
+
+                  <button onclick="window.OmnexaApp.navigateTo('nearby')" class="px-6 py-4 rounded-2xl border border-slate-700 bg-slate-800/60 hover:bg-slate-800 text-white font-bold text-sm transition flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-cyan-400"></i>
+                    <span>استكشف الكباتن القريبين منك</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Hero Quick Booking Widget Card -->
+              <div class="lg:col-span-5">
+                <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-800 border border-white/20">
+                  <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div>
+                      <span class="text-xs font-bold text-sky-600 uppercase tracking-wider block">طلب فوري سريع</span>
+                      <h3 class="text-xl font-black text-slate-900">احجز غسيلك في 30 ثانية</h3>
+                    </div>
+                    <span class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                      <i data-lucide="zap" class="w-5 h-5 fill-sky-600"></i>
+                    </span>
+                  </div>
+
+                  <!-- Quick Service Type Selector -->
+                  <div class="my-4">
+                    <label class="block text-xs font-bold text-slate-600 mb-2">نوع الخدمة المفضلة:</label>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
+                      <button onclick="window.OmnexaApp.setServiceType('doorstep')" class="btn-service-type py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 bg-sky-600 text-white shadow" data-type="doorstep">
+                        <i data-lucide="truck" class="w-4 h-4"></i>
+                        <span>متنقل عند بابك</span>
+                      </button>
+                      <button onclick="window.OmnexaApp.setServiceType('station')" class="btn-service-type py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 bg-white text-slate-700" data-type="station">
+                        <i data-lucide="warehouse" class="w-4 h-4"></i>
+                        <span>محطة غسيل شريكة</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Quick Vehicle Size Chips -->
+                  <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-600 mb-2">نوع السيارة:</label>
+                    <div class="grid grid-cols-4 gap-2">
+                      <button onclick="window.OmnexaApp.selectVehicleType('sedan')" class="p-2 rounded-xl border border-slate-200 text-center hover:border-sky-500 transition active bg-sky-50/50">
+                        <i data-lucide="car" class="w-5 h-5 mx-auto mb-1 text-slate-700"></i>
+                        <span class="text-[11px] font-bold block">سيدان</span>
+                      </button>
+                      <button onclick="window.OmnexaApp.selectVehicleType('suv')" class="p-2 rounded-xl border border-slate-200 text-center hover:border-sky-500 transition">
+                        <i data-lucide="truck" class="w-5 h-5 mx-auto mb-1 text-slate-700"></i>
+                        <span class="text-[11px] font-bold block">SUV عائلي</span>
+                      </button>
+                      <button onclick="window.OmnexaApp.selectVehicleType('truck')" class="p-2 rounded-xl border border-slate-200 text-center hover:border-sky-500 transition">
+                        <i data-lucide="shield" class="w-5 h-5 mx-auto mb-1 text-slate-700"></i>
+                        <span class="text-[11px] font-bold block">بيك أب</span>
+                      </button>
+                      <button onclick="window.OmnexaApp.selectVehicleType('luxury')" class="p-2 rounded-xl border border-slate-200 text-center hover:border-sky-500 transition">
+                        <i data-lucide="sparkles" class="w-5 h-5 mx-auto mb-1 text-slate-700"></i>
+                        <span class="text-[11px] font-bold block">فارهة</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Quick Location Picker -->
+                  <div class="mb-5">
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">موقع السيارة الحالي:</label>
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-3 text-xs text-slate-800">
+                      <i data-lucide="map-pin" class="w-4 h-4 text-sky-600 shrink-0"></i>
+                      <span class="truncate font-semibold">حي النرجس، شارع الأمير فيصل بن بندر، الرياض</span>
+                      <button onclick="window.OmnexaApp.navigateTo('booking')" class="text-sky-600 hover:text-sky-700 font-bold text-[11px] shrink-0 underline mr-auto">تغيير</button>
+                    </div>
+                  </div>
+
+                  <!-- Launch Wizard Button -->
+                  <button onclick="window.OmnexaApp.navigateTo('booking')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 transition active:scale-98">
+                    <span>متابعة اختيار الباقة والموعد</span>
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                  </button>
+
+                  <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500 px-1">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i> دفع آمن بمدى و Apple Pay
+                    </span>
+                    <span>ماء مقطر نقي 100%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wash Packages Section -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="inline-block text-xs font-extrabold text-sky-600 uppercase tracking-wider px-3 py-1 rounded-full bg-sky-50 border border-sky-100 mb-3">
+              باقات العناية الفائقة
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-slate-900">
+              اختر الباقة المناسبة لسيارتك بكل شفافية
+            </h2>
+            <p class="text-slate-500 text-sm sm:text-base mt-3">
+              أسعار واضحة بدون رسوم خفية، معتمدة ومطابقة لأعلى معايير العناية بالطلاء والفرش الداخلي.
+            </p>
+          </div>
+
+          <!-- Packages Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Package 1: Express -->
+            <div class="package-card bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 hover:shadow-xl hover:border-sky-400 transition-all flex flex-col justify-between" data-id="pkg-express">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">سريع واقتصادي</span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 30 دقيقة</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-1">غسيل إكسبريس ساطع</h3>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">غسيل يدوي خارجي فائق اللمعان مع تجفيف خالي من البقع وتلميع الجنوط.</p>
+                <div class="flex items-baseline gap-1 my-4 pb-4 border-b border-slate-100">
+                  <strong class="text-3xl font-black text-slate-900">45</strong>
+                  <span class="text-sm font-bold text-slate-500">ر.س</span>
+                  <span class="text-[10px] text-slate-400 mr-2">شامل الضريبة</span>
+                </div>
+                <ul class="space-y-2.5 text-xs text-slate-600">
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> رغوة الثلج النشطة لتفكيك الأتربة</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تنظيف وتلميع الجنوط والإطارات</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تجفيف مايكروفايبر مانع للخدوش</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تنظيف الزجاج الخارجي</li>
+                </ul>
+              </div>
+              <button onclick="window.OmnexaApp.selectPackage('pkg-express'); window.OmnexaApp.navigateTo('booking')" class="w-full mt-6 py-3 rounded-xl border-2 border-slate-200 hover:border-sky-600 hover:text-sky-600 font-bold text-xs transition">
+                اختيار هذه الباقة
+              </button>
+            </div>
+
+            <!-- Package 2: Full Refresh (Most Popular) -->
+            <div class="package-card bg-white rounded-3xl p-6 shadow-xl border-2 border-sky-500 hover:shadow-2xl transition-all flex flex-col justify-between relative transform lg:-translate-y-2" data-id="pkg-refresh">
+              <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 text-[11px] font-black px-4 py-1 rounded-full shadow-md">
+                الأكثر طلباً بالمملكة ⭐
+              </span>
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">داخلي وخارجي شامل</span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 60 دقيقة</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-1">غسيل أومنيسكا الشامل</h3>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">العناية المتكاملة بالمقصورة والبودي الخارجي؛ شفط الأتربة وتطهير الطبلون والتعطير.</p>
+                <div class="flex items-baseline gap-1 my-4 pb-4 border-b border-slate-100">
+                  <strong class="text-3xl font-black text-sky-600">89</strong>
+                  <span class="text-sm font-bold text-slate-500">ر.س</span>
+                  <span class="text-[10px] text-slate-400 mr-2">شامل الضريبة</span>
+                </div>
+                <ul class="space-y-2.5 text-xs text-slate-600">
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> جميع مزايا باقة الغسيل الخارجي</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> شفط عميق للمقاعد، الأرضيات والشنطة</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> مسح وحماية الطبلون بمواد UV</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تنظيف الزجاج والمرايا من الداخل والخارج</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> غسيل الدعاسات وتجفيفها</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تعطير ملكي فاخر برائحة العود</li>
+                </ul>
+              </div>
+              <button onclick="window.OmnexaApp.selectPackage('pkg-refresh'); window.OmnexaApp.navigateTo('booking')" class="w-full mt-6 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs shadow-lg shadow-sky-600/30 transition">
+                اختيار الباقة الشاملة
+              </button>
+            </div>
+
+            <!-- Package 3: Pro Steam & Sanitize -->
+            <div class="package-card bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 hover:shadow-xl hover:border-sky-400 transition-all flex flex-col justify-between" data-id="pkg-steam">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">بخار وتعقيم صحي</span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 85 دقيقة</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-1">غسيل البخار المتطور</h3>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">بخار إيطالي حار يزيل 99.9% من الجراثيم والبقع العميقة ويعقم فتحات التكييف.</p>
+                <div class="flex items-baseline gap-1 my-4 pb-4 border-b border-slate-100">
+                  <strong class="text-3xl font-black text-slate-900">149</strong>
+                  <span class="text-sm font-bold text-slate-500">ر.س</span>
+                  <span class="text-[10px] text-slate-400 mr-2">شامل الضريبة</span>
+                </div>
+                <ul class="space-y-2.5 text-xs text-slate-600">
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> كل ما تشمله باقة أومنيسكا الشاملة</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> غسيل المقاعد والأرضيات بالبخار الحار</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تطهير مجاري التكييف ومسارات الهواء</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> إزالة البقع الدهنية المستعصية</li>
+                </ul>
+              </div>
+              <button onclick="window.OmnexaApp.selectPackage('pkg-steam'); window.OmnexaApp.navigateTo('booking')" class="w-full mt-6 py-3 rounded-xl border-2 border-slate-200 hover:border-sky-600 hover:text-sky-600 font-bold text-xs transition">
+                اختيار باقة البخار
+              </button>
+            </div>
+
+            <!-- Package 4: Showroom Ceramic -->
+            <div class="package-card bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 hover:shadow-xl hover:border-purple-400 transition-all flex flex-col justify-between" data-id="pkg-ceramic">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">فخامة وتلميع 💎</span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 140 دقيقة</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-1">تلميع صالة العرض ونانو</h3>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">معالجة بالصلصال Clay Bar وواكس يدوي نانو يمنح السيارة بريقاً كالمرآة.</p>
+                <div class="flex items-baseline gap-1 my-4 pb-4 border-b border-slate-100">
+                  <strong class="text-3xl font-black text-slate-900">279</strong>
+                  <span class="text-sm font-bold text-slate-500">ر.س</span>
+                  <span class="text-[10px] text-slate-400 mr-2">شامل الضريبة</span>
+                </div>
+                <ul class="space-y-2.5 text-xs text-slate-600">
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> باقة الغسيل الشامل الداخلي والخارجي</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> معالجة الطلاء بالصلصال النقي Clay Bar</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> طبقة نانو سيراميك هيدروفوبية طاردة للماء</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> ترطيب ومعالجة الجلد الطبيعي بمغذيات خاصة</li>
+                  <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> تنظيف وتلميع حوض المحرك المتخصص</li>
+                </ul>
+              </div>
+              <button onclick="window.OmnexaApp.selectPackage('pkg-ceramic'); window.OmnexaApp.navigateTo('booking')" class="w-full mt-6 py-3 rounded-xl border-2 border-slate-200 hover:border-purple-600 hover:text-purple-600 font-bold text-xs transition">
+                اختيار باقة التلميع الفاخر
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doorstep Mobile Advantage Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+          <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+            <div class="lg:col-span-8 space-y-4">
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest block">لماذا يختار عملاؤنا أومنيسكا؟</span>
+              <h3 class="text-2xl sm:text-3xl font-black">شاحنات مجهزة بالكامل لا تحتاج لأي ماء أو كهرباء من منزلك!</h3>
+              <p class="text-sm text-slate-300 leading-relaxed max-w-2xl">
+                شاحنات الخدمة المتنقلة لدينا مزودة بخزانات ماء نقي مقطر (DI Pure Water) منزوع الأملاح لمنع أي تكلسات أو بهتان للطلاء، مع مولدات طاقة صامتة لا تسبب أي إزعاج لجيرانك.
+              </p>
+              <div class="flex flex-wrap gap-4 pt-2">
+                <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-xs font-semibold flex items-center gap-2 border border-white/10">
+                  <i data-lucide="droplet" class="w-4 h-4 text-cyan-400"></i> ماء مقطر نقي خالي من الأملاح
+                </span>
+                <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-xs font-semibold flex items-center gap-2 border border-white/10">
+                  <i data-lucide="volume-x" class="w-4 h-4 text-cyan-400"></i> مولد كهرباء فائق الهدوء
+                </span>
+                <span class="px-3.5 py-1.5 rounded-xl bg-white/10 text-xs font-semibold flex items-center gap-2 border border-white/10">
+                  <i data-lucide="leaf" class="w-4 h-4 text-emerald-400"></i> توفير 80% من استهلاك المياه
+                </span>
+              </div>
+            </div>
+            <div class="lg:col-span-4 text-center lg:text-left">
+              <button onclick="window.OmnexaApp.navigateTo('booking')" class="bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black px-8 py-4 rounded-2xl shadow-xl shadow-cyan-400/20 text-sm transition">
+                جرب الخدمة المتنقلة الآن
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider block mb-2">رحلة العميل</span>
+            <h2 class="text-3xl font-black text-slate-900">4 خطوات بسيطة لسيارة تلمع كالجديدة</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center relative group hover:shadow-lg transition">
+              <div class="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 font-black text-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                1
+              </div>
+              <h4 class="font-bold text-slate-900 text-base mb-1">حدد موقع السيارة</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">اختر موقع بيتك أو مواقف عملك على الخريطة التفاعلية بنقرة واحدة.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center relative group hover:shadow-lg transition">
+              <div class="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 font-black text-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                2
+              </div>
+              <h4 class="font-bold text-slate-900 text-base mb-1">اختر الباقة والإضافات</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">حدد الباقة المناسبة (إكسبريس، شامل، بخار، نانو) وأي إضافات تحبها.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center relative group hover:shadow-lg transition">
+              <div class="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 font-black text-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                3
+              </div>
+              <h4 class="font-bold text-slate-900 text-base mb-1">تتبع الكابتن مباشرة</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">شاهد شاحنة الكابتن تقترب من موقعك على الخريطة في الوقت الفعلي.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center relative group hover:shadow-lg transition">
+              <div class="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 font-black text-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                4
+              </div>
+              <h4 class="font-bold text-slate-900 text-base mb-1">استلم سيارتك وانطلق!</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">راجع صور الفحص قبل وبعد الغسيل وادفع بأمان بـ Apple Pay أو مدى.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Testimonials -->
+        <div class="bg-slate-100/70 py-16 px-4 sm:px-6 lg:px-8">
+          <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+              <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider block mb-2">تجارب حقيقية</span>
+              <h3 class="text-2xl sm:text-3xl font-black text-slate-900">ماذا يقول عملاء أومنيسكا في الرياض وجدة؟</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-1 text-amber-400 mb-3">
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-4">"تجربة خيالية بكل معنى الكلمة، وصل الكابتن في الموعد بالدقيقة ومعه كل المعدات والماء النقي، غسل السيارة عند باب البيت وكأنها خرجت من الوكالة!"</p>
+                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                  <div>
+                    <strong class="text-xs font-bold text-slate-900 block">عبدالله السديري</strong>
+                    <span class="text-[10px] text-slate-400">الرياض • لكزس LX600</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">عميل موثق</span>
+                </div>
+              </div>
+
+              <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-1 text-amber-400 mb-3">
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-4">"أفضل ما في أومنيسكا هو احترافية التعامل ومواد العناية الخاصة بالجلد والنانو سيراميك. أطلبهم أسبوعياً وأنا في الدوام في KAFD."</p>
+                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                  <div>
+                    <strong class="text-xs font-bold text-slate-900 block">د. ريم الخالدي</strong>
+                    <span class="text-[10px] text-slate-400">الرياض • بورش تايكان</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">عميل موثق</span>
+                </div>
+              </div>
+
+              <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-1 text-amber-400 mb-3">
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                  <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-4">"تتبع الطلب بالخريطة ورؤية الكابتن في طريقه إليك يعطيك راحة واطمئنان، وطريقة الدفع بـ Apple Pay سلسة للغاية وبدون أي تعقيد."</p>
+                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                  <div>
+                    <strong class="text-xs font-bold text-slate-900 block">م. فيصل التميمي</strong>
+                    <span class="text-[10px] text-slate-400">الرياض • رنج روفر فيلار</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">عميل موثق</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: BOOKING WIZARD -->
+      <!-- ========================================== -->
+      <section id="view-booking" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Header -->
+        <div class="mb-8">
+          <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider block mb-1">نظام الحجز الذكي</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">تخصيص وحجز خدمة غسيل سيارتك</h2>
+          <p class="text-xs text-slate-500 mt-1">اختر نوع سيارتك، الباقة، الموقع، والموعد الأنسب لك في خطوات سريعة.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Wizard Form Steps -->
+          <div class="lg:col-span-8 space-y-8">
+            
+            <!-- Step 1: Service Type -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                <span>اختر أسلوب تقديم الخدمة:</span>
+              </h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div onclick="window.OmnexaApp.setServiceType('doorstep')" class="cursor-pointer p-5 rounded-2xl border-2 border-sky-600 bg-sky-50/40 hover:bg-sky-50 transition flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0">
+                    <i data-lucide="truck" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <strong class="text-sm font-bold text-slate-900">غسيل متنقل (عند موقعك)</strong>
+                      <span class="text-[10px] font-bold bg-sky-200 text-sky-900 px-2 py-0.5 rounded-full">موصى به</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">شاحنة الخدمة المجهزة تصل إلى باب بيتك أو مواقف عملك وتغسل سيارتك في مكانها.</p>
+                  </div>
+                </div>
+
+                <div onclick="window.OmnexaApp.setServiceType('station')" class="cursor-pointer p-5 rounded-2xl border-2 border-slate-200 hover:border-slate-400 bg-white transition flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="warehouse" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <strong class="text-sm font-bold text-slate-900 block">مغاسل الشركاء المعتمدة</strong>
+                    <p class="text-xs text-slate-500 mt-1">احجز مسارك الخاص بدون انتظار في إحدى محطات أومنيسكا الشريكة القريبة منك.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Vehicle Selection -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                <span>اختر نوع وحجم السيارة:</span>
+              </h3>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div onclick="window.OmnexaApp.selectVehicleType('sedan')" class="vehicle-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-sky-600 bg-sky-50/40 text-center transition" data-id="sedan">
+                  <i data-lucide="car" class="w-7 h-7 mx-auto mb-2 text-sky-600"></i>
+                  <strong class="text-xs font-bold text-slate-900 block">سيدان</strong>
+                  <span class="text-[10px] text-slate-500">مثل كامري، مرسيدس</span>
+                </div>
+
+                <div onclick="window.OmnexaApp.selectVehicleType('suv')" class="vehicle-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-slate-400 transition" data-id="suv">
+                  <i data-lucide="truck" class="w-7 h-7 mx-auto mb-2 text-slate-700"></i>
+                  <strong class="text-xs font-bold text-slate-900 block">SUV / عائلية</strong>
+                  <span class="text-[10px] text-slate-500">مثل لاندكروزر، تاهو</span>
+                </div>
+
+                <div onclick="window.OmnexaApp.selectVehicleType('truck')" class="vehicle-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-slate-400 transition" data-id="truck">
+                  <i data-lucide="shield" class="w-7 h-7 mx-auto mb-2 text-slate-700"></i>
+                  <strong class="text-xs font-bold text-slate-900 block">بيك أب / شاحنة</strong>
+                  <span class="text-[10px] text-slate-500">مثل جمس، F-150</span>
+                </div>
+
+                <div onclick="window.OmnexaApp.selectVehicleType('luxury')" class="vehicle-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-slate-400 transition" data-id="luxury">
+                  <i data-lucide="zap" class="w-7 h-7 mx-auto mb-2 text-slate-700"></i>
+                  <strong class="text-xs font-bold text-slate-900 block">فارهة / كوبيه</strong>
+                  <span class="text-[10px] text-slate-500">مثل بورش، فيراري</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Packages Selection -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                <span>اختر باقة الغسيل الأساسية:</span>
+              </h3>
+
+              <div class="space-y-3">
+                <div onclick="window.OmnexaApp.selectPackage('pkg-express')" class="package-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-slate-200 hover:border-sky-400 transition flex items-center justify-between" data-id="pkg-express">
+                  <div class="flex items-center gap-4">
+                    <span class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">1</span>
+                    <div>
+                      <h4 class="font-bold text-sm text-slate-900">غسيل إكسبريس ساطع (خارجي)</h4>
+                      <p class="text-xs text-slate-500">رغوة ثلجية + تجفيف مايكروفايبر + تلميع جنوط • 30 دقيقة</p>
+                    </div>
+                  </div>
+                  <strong class="text-base font-black text-slate-900">45 ر.س</strong>
+                </div>
+
+                <div onclick="window.OmnexaApp.selectPackage('pkg-refresh')" class="package-card selection-card active cursor-pointer p-4 rounded-2xl border-2 border-sky-600 bg-sky-50/30 transition flex items-center justify-between" data-id="pkg-refresh">
+                  <div class="flex items-center gap-4">
+                    <span class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold">2</span>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <h4 class="font-bold text-sm text-slate-900">غسيل أومنيسكا الشامل (داخلي وخارجي)</h4>
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full">الأكثر طلباً</span>
+                      </div>
+                      <p class="text-xs text-slate-500">شفط أتربة كامل + تطهير طبلون + تنظيف زجاج + تعطير فاخر • 60 دقيقة</p>
+                    </div>
+                  </div>
+                  <strong class="text-base font-black text-sky-600">89 ر.س</strong>
+                </div>
+
+                <div onclick="window.OmnexaApp.selectPackage('pkg-steam')" class="package-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-slate-200 hover:border-sky-400 transition flex items-center justify-between" data-id="pkg-steam">
+                  <div class="flex items-center gap-4">
+                    <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">3</span>
+                    <div>
+                      <h4 class="font-bold text-sm text-slate-900">غسيل البخار المتطور والتعقيم</h4>
+                      <p class="text-xs text-slate-500">بخار حار يقضي على 99.9% من الجراثيم والمقاعد والتكييف • 85 دقيقة</p>
+                    </div>
+                  </div>
+                  <strong class="text-base font-black text-slate-900">149 ر.س</strong>
+                </div>
+
+                <div onclick="window.OmnexaApp.selectPackage('pkg-ceramic')" class="package-card selection-card cursor-pointer p-4 rounded-2xl border-2 border-slate-200 hover:border-sky-400 transition flex items-center justify-between" data-id="pkg-ceramic">
+                  <div class="flex items-center gap-4">
+                    <span class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">4</span>
+                    <div>
+                      <h4 class="font-bold text-sm text-slate-900">تلميع صالة العرض ونانو سيراميك</h4>
+                      <p class="text-xs text-slate-500">صلصال Clay Bar + واكس هيدروفوبي طارد للماء + ترطيب جلد • 140 دقيقة</p>
+                    </div>
+                  </div>
+                  <strong class="text-base font-black text-slate-900">279 ر.س</strong>
+                </div>
+              </div>
+
+              <!-- Add-ons Multi Selection -->
+              <div class="mt-6 pt-6 border-t border-slate-100">
+                <span class="text-xs font-bold text-slate-600 block mb-3">إضافات مخصصة اختيارية:</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div onclick="window.OmnexaApp.toggleAddOn('addon-wax')" class="addon-card selection-card active cursor-pointer p-3.5 rounded-xl border border-sky-400 bg-sky-50/30 flex items-center justify-between" data-id="addon-wax">
+                    <div class="flex items-center gap-2">
+                      <input type="checkbox" checked class="rounded text-sky-600 focus:ring-sky-500 pointer-events-none">
+                      <div>
+                        <span class="text-xs font-bold text-slate-900 block">طبقة نانو واكس حماية إضافية</span>
+                        <span class="text-[10px] text-slate-500">لمعان مضاعف يطرد الغبار</span>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-sky-700">+35 ر.س</span>
+                  </div>
+
+                  <div onclick="window.OmnexaApp.toggleAddOn('addon-engine')" class="addon-card selection-card cursor-pointer p-3.5 rounded-xl border border-slate-200 hover:border-slate-400 flex items-center justify-between" data-id="addon-engine">
+                    <div class="flex items-center gap-2">
+                      <input type="checkbox" class="rounded text-sky-600 focus:ring-sky-500 pointer-events-none">
+                      <div>
+                        <span class="text-xs font-bold text-slate-900 block">غسيل وتلميع حوض المحرك</span>
+                        <span class="text-[10px] text-slate-500">بمواد آمنة على الحساسات والكهرباء</span>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">+45 ر.س</span>
+                  </div>
+
+                  <div onclick="window.OmnexaApp.toggleAddOn('addon-pet')" class="addon-card selection-card cursor-pointer p-3.5 rounded-xl border border-slate-200 hover:border-slate-400 flex items-center justify-between" data-id="addon-pet">
+                    <div class="flex items-center gap-2">
+                      <input type="checkbox" class="rounded text-sky-600 focus:ring-sky-500 pointer-events-none">
+                      <div>
+                        <span class="text-xs font-bold text-slate-900 block">إزالة الأتربة وشعر الحيوانات</span>
+                        <span class="text-[10px] text-slate-500">فرشاة خاصة لسحب الألياف العميقة</span>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">+30 ر.س</span>
+                  </div>
+
+                  <div onclick="window.OmnexaApp.toggleAddOn('addon-ozone')" class="addon-card selection-card cursor-pointer p-3.5 rounded-xl border border-slate-200 hover:border-slate-400 flex items-center justify-between" data-id="addon-ozone">
+                    <div class="flex items-center gap-2">
+                      <input type="checkbox" class="rounded text-sky-600 focus:ring-sky-500 pointer-events-none">
+                      <div>
+                        <span class="text-xs font-bold text-slate-900 block">تعقيم الأوزون وعطر ملكي مستورد</span>
+                        <span class="text-[10px] text-slate-500">يقضي على روائح التكييف نهائياً</span>
+                      </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">+25 ر.س</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Location & Interactive Map Picker -->
+            <div id="doorstepLocationSection" class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <h3 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">4</span>
+                <span>تحديد موقع السيارة على الخريطة:</span>
+              </h3>
+              <p class="text-xs text-slate-500 mb-4">اسحب الدبوس الأحمر لتحديد مكان وقوف سيارتك بدقة ليسهل على الكابتن الوصول فوراً.</p>
+
+              <!-- Interactive Leaflet Map Picker -->
+              <div id="bookingMapPicker" class="w-full h-72 rounded-2xl border border-slate-200 mb-4 shadow-inner"></div>
+
+              <!-- Notes for Captain -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات وقوف السيارة للكابتن:</label>
+                <input type="text" placeholder="مثال: السيارة متوقفة تحت المظلة الخارجية أو مواقف B2" value="السيارة متوقفة أمام مظلة الفيلا الخارجية" 
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+              </div>
+            </div>
+
+            <!-- Station Picker (when station wash is selected) -->
+            <div id="stationPickerSection" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <h3 class="text-base font-bold text-slate-900 mb-4">اختر محطة الغسيل الشريكة الأقرب إليك:</h3>
+              <div class="space-y-3">
+                <div class="p-4 rounded-2xl border-2 border-sky-600 bg-sky-50/30 flex items-center justify-between">
+                  <div>
+                    <strong class="text-sm font-bold text-slate-900 block">مركز أومنيسكا للعناية الفائقة - طريق الملك فهد</strong>
+                    <p class="text-xs text-slate-500">طريق الملك فهد، العليا، مقابل برج المملكة • مسافة 1.8 كم</p>
+                  </div>
+                  <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md">مفتوح الآن</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 5: Date & Time Picker -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">5</span>
+                <span>اختر موعد الغسيل:</span>
+              </h3>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                <button class="p-3 rounded-2xl border-2 border-sky-600 bg-sky-50 text-sky-950 font-bold text-xs text-center shadow-sm">
+                  <span class="block">اليوم</span>
+                  <span class="text-[10px] text-sky-700">31 أكتوبر</span>
+                </button>
+                <button class="p-3 rounded-2xl border border-slate-200 text-slate-700 hover:border-slate-400 font-bold text-xs text-center">
+                  <span class="block">غداً</span>
+                  <span class="text-[10px] text-slate-400">1 نوفمبر</span>
+                </button>
+                <button class="p-3 rounded-2xl border border-slate-200 text-slate-700 hover:border-slate-400 font-bold text-xs text-center">
+                  <span class="block">الإثنين</span>
+                  <span class="text-[10px] text-slate-400">2 نوفمبر</span>
+                </button>
+                <button class="p-3 rounded-2xl border border-slate-200 text-slate-700 hover:border-slate-400 font-bold text-xs text-center">
+                  <span class="block">الثلاثاء</span>
+                  <span class="text-[10px] text-slate-400">3 نوفمبر</span>
+                </button>
+              </div>
+
+              <!-- Available slots -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button class="p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 text-emerald-900 font-bold text-xs flex items-center justify-between">
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>خدمة فورية (خلال 35-45 دقيقة)</span>
+                  </span>
+                  <span class="text-[10px] bg-emerald-200/80 px-2 py-0.5 rounded">متاح الآن</span>
+                </button>
+
+                <button class="p-3 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-700 font-semibold text-xs flex items-center justify-between">
+                  <span>07:00 م - 08:30 م (مسائي)</span>
+                  <span class="text-[10px] text-slate-400">مجدول</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side Summary & Invoice Pane (Rendered dynamically by renderBookingWizard) -->
+          <div class="lg:col-span-4" id="bookingSummaryPane"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: LIVE TRACKING PAGE -->
+      <!-- ========================================== -->
+      <section id="view-tracking" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Header with Live Pulse -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>تتبع حي ومباشر للمهمة</span>
+              </span>
+              <span class="text-xs text-slate-400">|</span>
+              <span class="text-xs font-mono font-bold text-slate-500">رقم الطلب: #OMN-88421</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">حالة غسيل السيارة الآن</h2>
+          </div>
+
+          <!-- Demo Quick Controller (Switch status easily for presentation) -->
+          <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs">
+            <span class="text-slate-500 text-[11px] px-2 font-bold hidden sm:inline">محاكاة المراحل:</span>
+            <button onclick="window.OmnexaApp.advanceTrackingStep(0)" class="px-2.5 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-700 hover:bg-slate-50">1. مؤكد</button>
+            <button onclick="window.OmnexaApp.advanceTrackingStep(1)" class="px-2.5 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-700 hover:bg-slate-50">2. تعيين</button>
+            <button onclick="window.OmnexaApp.advanceTrackingStep(2)" class="px-2.5 py-1 rounded-lg bg-white shadow-sm font-bold text-slate-700 hover:bg-slate-50">3. بالطريق</button>
+            <button onclick="window.OmnexaApp.advanceTrackingStep(3)" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-black shadow-md">4. جاري الغسيل</button>
+            <button onclick="window.OmnexaApp.advanceTrackingStep(4)" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-black shadow-md">5. تم الإنجاز</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Live Interactive Map with Moving Captain Marker -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="map" class="w-4 h-4 text-sky-600"></i>
+                  <span class="text-xs font-bold text-slate-700">موقع الكابتن والمسار المباشر (حي النرجس، الرياض)</span>
+                </div>
+                <span class="text-xs font-black text-sky-600 bg-sky-50 px-2.5 py-1 rounded-lg" id="trackingEtaMinutes">
+                  11 دقيقة للوصول
+                </span>
+              </div>
+
+              <!-- Leaflet Map Container -->
+              <div id="trackingMapContainer" class="w-full h-96 rounded-2xl border border-slate-200 shadow-inner"></div>
+
+              <!-- Captain Details Card -->
+              <div class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80" class="w-14 h-14 rounded-2xl object-cover ring-2 ring-sky-300">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <strong class="text-sm font-bold text-slate-900">الكابتن / فهد الدوسري</strong>
+                      <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full">⭐ 4.96</span>
+                    </div>
+                    <p class="text-xs text-slate-500">فان خدمة متنقلة تويوتا هايلوكس • لوحة (أ و م 4040)</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button onclick="window.OmnexaApp.openChatModal()" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                    <i data-lucide="message-square" class="w-4 h-4 text-sky-600"></i>
+                    <span>محادثة</span>
+                  </button>
+                  <a href="tel:+966501112233" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-black flex items-center gap-1.5 shadow-md shadow-sky-600/20 transition">
+                    <i data-lucide="phone-call" class="w-4 h-4"></i>
+                    <span>اتصال</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Before and After Interactive Quality Check Slider -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-base font-black text-slate-900">صور فحص الجودة (قبل وبعد الغسيل)</h3>
+                  <p class="text-xs text-slate-500">حرك المؤشر للمقارنة المباشرة بين حالة السيارة قبل وبعد العناية الفائقة</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                  فحص معتمد 100%
+                </span>
+              </div>
+
+              <!-- Interactive Drag Slider -->
+              <div id="baSliderContainer" class="ba-slider-container w-full h-64 sm:h-80 bg-slate-900 relative">
+                <!-- After Image (Background) -->
+                <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                <span class="absolute bottom-3 left-3 bg-emerald-600/90 backdrop-blur-md text-white text-xs font-black px-3 py-1 rounded-lg">بعد الغسيل (لمعان زجاجي) ✨</span>
+
+                <!-- Before Image (Overlay clipped) -->
+                <div id="baSliderOverlay" class="ba-slider-overlay w-1/2">
+                  <img src="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover" style="max-width: none; width: 100%;">
+                  <span class="absolute bottom-3 right-3 bg-slate-900/90 backdrop-blur-md text-white text-xs font-black px-3 py-1 rounded-lg">قبل الغسيل (غبار وطين)</span>
+                </div>
+
+                <!-- Draggable Handle Bar -->
+                <div id="baSliderHandle" class="ba-slider-handle left-1/2">
+                  <div class="ba-slider-button">
+                    <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Status Stepper Timeline -->
+          <div class="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+            <h3 class="font-black text-slate-900 text-lg mb-6 pb-4 border-b border-slate-100">مراحل تنفيذ الخدمة</h3>
+            <div id="trackingStatusSteps" class="space-y-2"></div>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 space-y-3">
+              <div class="flex justify-between text-xs text-slate-600">
+                <span>الخدمة المطلوبة:</span>
+                <strong class="text-slate-900">غسيل أومنيسكا الشامل</strong>
+              </div>
+              <div class="flex justify-between text-xs text-slate-600">
+                <span>السيارة:</span>
+                <strong class="text-slate-900">مرسيدس E350 (أ ب ج 1234)</strong>
+              </div>
+              <div class="flex justify-between text-xs text-slate-600">
+                <span>الموقع:</span>
+                <span class="text-slate-900 font-medium">حي النرجس، الرياض</span>
+              </div>
+              <div class="flex justify-between text-xs text-slate-600">
+                <span>طريقة الدفع:</span>
+                <span class="text-slate-900 font-bold flex items-center gap-1">
+                  <i data-lucide="credit-card" class="w-3.5 h-3.5 text-sky-600"></i> Apple Pay (مدفوع)
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 4: PAST ORDERS -->
+      <!-- ========================================== -->
+      <section id="view-orders" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div>
+            <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider block mb-1">السجل والعمليات</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900">طلبات الغسيل السابقة والحالية</h2>
+            <p class="text-xs text-slate-500 mt-1">استعرض تفاصيل الفواتير، أعد طلب نفس الخدمة بضغطة واحدة، أو قيّم الكابتن.</p>
+          </div>
+          <button onclick="window.OmnexaApp.navigateTo('booking')" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>طلب غسيل جديد</span>
+          </button>
+        </div>
+
+        <div id="ordersListContainer" class="space-y-4"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 5: GARAGE FLEET -->
+      <!-- ========================================== -->
+      <section id="view-garage" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div>
+            <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider block mb-1">أسطول سياراتك</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900">جراج سياراتي المحفوظة</h2>
+            <p class="text-xs text-slate-500 mt-1">أضف سياراتك وسيارات العائلة لطلب الغسيل الفوري دون الحاجة لإعادة إدخال البيانات في كل مرة.</p>
+          </div>
+          <button onclick="document.getElementById('addVehicleModal').classList.remove('hidden')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>إضافة سيارة جديدة</span>
+          </button>
+        </div>
+
+        <div id="garageListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 6: USER PROFILE & LOYALTY -->
+      <!-- ========================================== -->
+      <section id="view-profile" class="view-section hidden max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="mb-8">
+          <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider block mb-1">الملف الشخصي والولاء</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900">حسابي ومكافآت أومنيسكا</h2>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100" id="userProfileDetails"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 7: NEARBY MAP & CENTERS -->
+      <!-- ========================================== -->
+      <section id="view-nearby" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="mb-8">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="text-xs font-extrabold text-sky-600 uppercase tracking-wider">تغطية مباشرة وحية</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">شاحنات الغسيل المتنقلة والمحطات القريبة منك</h2>
+          <p class="text-xs text-slate-500 mt-1">تتبع وحدات الخدمة السريعة المتواجدة حالياً في أحياء الرياض (النرجس، حطين، الملقا، العليا).</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-8 bg-white rounded-3xl p-4 shadow-sm border border-slate-100">
+            <div id="nearbyMapContainer" class="w-full h-[520px] rounded-2xl border border-slate-200"></div>
+          </div>
+
+          <div class="lg:col-span-4 space-y-4">
+            <h3 class="font-bold text-slate-900 text-sm">الوحدات والمراكز الجاهزة للطلب فوراً:</h3>
+            
+            <!-- List of live vans -->
+            <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-sky-300 transition">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-900">كابتن فهد الدوسري (فان مجهز)</span>
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">متاح (1.4 كم)</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3">حي النرجس / الملقا • يصل خلال 12 دقيقة</p>
+              <button onclick="window.OmnexaApp.quickBookWithCaptain('c-101')" class="w-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold py-2 rounded-xl transition">
+                طلب الكابتن فوراً
+              </button>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-sky-300 transition">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-900">كابتن سامي الحربي (فان إيكو)</span>
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">متاح (2.8 كم)</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3">حي حطين / الدرعية • يصل خلال 20 دقيقة</p>
+              <button onclick="window.OmnexaApp.quickBookWithCaptain('c-102')" class="w-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold py-2 rounded-xl transition">
+                طلب الكابتن فوراً
+              </button>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-slate-300 transition">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-900">مركز أومنيسكا - طريق الملك فهد</span>
+                <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">محطة ثابتة (1.8 كم)</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3">طريق الملك فهد، العليا • صالة انتظار VIP مفتوحة 24 ساعة</p>
+              <button onclick="window.OmnexaApp.quickBookStation('st-1')" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 rounded-xl transition">
+                حجز مسار بالمحطة
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Professional Footer -->
+    <footer class="bg-slate-950 text-slate-400 text-xs py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-900 mt-auto">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-slate-900">
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 text-white font-black text-lg">
+            <span class="w-8 h-8 rounded-xl bg-sky-600 flex items-center justify-center text-white text-sm">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </span>
+            <span>OMNEXA WASH</span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">أول منصة متكاملة لغسيل السيارات والعناية الفائقة المتنقلة بضمان الجودة والماء النقي في المملكة العربية السعودية.</p>
+        </div>
+
+        <div>
+          <strong class="text-white text-sm font-bold block mb-3">روابط سريعة</strong>
+          <ul class="space-y-2">
+            <li><a href="#" onclick="window.OmnexaApp.navigateTo('home')" class="hover:text-white transition">الرئيسية والباقات</a></li>
+            <li><a href="#" onclick="window.OmnexaApp.navigateTo('booking')" class="hover:text-white transition">حجز موعد غسيل</a></li>
+            <li><a href="#" onclick="window.OmnexaApp.navigateTo('tracking')" class="hover:text-white transition">تتبع الطلب بالخريطة</a></li>
+            <li><a href="#" onclick="window.OmnexaApp.navigateTo('nearby')" class="hover:text-white transition">المغاسل والكباتن القريبين</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <strong class="text-white text-sm font-bold block mb-3">خدمة العملاء والدعم</strong>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-sky-400"></i> الرقم الموحد: 920088991</li>
+            <li class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-sky-400"></i> care@omnexa.sa</li>
+            <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-400"></i> الرياض، المملكة العربية السعودية</li>
+          </ul>
+        </div>
+
+        <div>
+          <strong class="text-white text-sm font-bold block mb-3">طرق دفع محلية معتمدة</strong>
+          <div class="flex flex-wrap gap-2 text-[10px] font-bold">
+            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-slate-300">مدى Mada</span>
+            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-slate-300">Apple Pay</span>
+            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-slate-300">Visa / Mastercard</span>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-3">سجل تجاري: 1010784920 • الرقم الضريبي: 310492817200003</p>
+        </div>
+      </div>
+
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between text-slate-500 gap-2">
+        <span>© 2026 Omnexa Wash. جميع الحقوق محفوظة لعلامة أومنيسكا التجارية.</span>
+        <span>ديمو تفاعلي متقدم مجهز للعرض والاختبار الحي.</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODALS -->
+  <!-- ========================================== -->
+
+  <!-- Modal 1: Booking Success Celebration Modal -->
+  <div id="bookingSuccessModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl border border-slate-100">
+      <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 animate-bounce">
+        <i data-lucide="check" class="w-10 h-10 stroke-[3]"></i>
+      </div>
+      <span class="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider block w-fit mx-auto mb-2">تم تأكيد الدفع التجريبي</span>
+      <h3 class="text-2xl font-black text-slate-900">تم حجز موعدك بنجاح!</h3>
+      <p class="text-xs text-slate-500 my-2 leading-relaxed">
+        تم تعيين الكابتن فهد الدوسري (شاحنة خدمة متنقلة) وتجهيز خزان الماء النقي ومعدات البخار.
+      </p>
+
+      <div class="bg-slate-50 p-4 rounded-2xl my-4 text-xs space-y-2 border border-slate-100">
+        <div class="flex justify-between text-slate-600">
+          <span>رقم الحجز:</span>
+          <strong class="font-mono text-slate-900 font-bold" id="modalBookingId">#OMN-88421</strong>
+        </div>
+        <div class="flex justify-between text-slate-600">
+          <span>المبلغ الإجمالي:</span>
+          <strong class="text-sky-600 font-black text-sm" id="modalBookingTotal">102.35 ر.س</strong>
+        </div>
+        <div class="flex justify-between text-slate-600">
+          <span>وقت الوصول المتوقع:</span>
+          <span class="text-emerald-700 font-bold">خلال 35-45 دقيقة</span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="document.getElementById('bookingSuccessModal').classList.add('hidden'); window.OmnexaApp.navigateTo('tracking')" 
+          class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-sky-600/20 text-xs transition flex items-center justify-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+          <span>تتبع الكابتن مباشرة على الخريطة</span>
+        </button>
+        <button onclick="document.getElementById('bookingSuccessModal').classList.add('hidden'); window.OmnexaApp.navigateTo('orders')" 
+          class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-xs transition">
+          عرض سجل طلباتي
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Live In-App Chat with Captain Modal -->
+  <div id="chatWithCaptainModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl w-full max-w-md h-[520px] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+      <!-- Chat Header -->
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-3">
+          <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover ring-2 ring-sky-400">
+          <div>
+            <strong class="text-xs font-bold text-slate-900 block">الكابتن فهد الدوسري</strong>
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> متصل الآن • في الطريق إليك
+            </span>
+          </div>
+        </div>
+        <button onclick="window.OmnexaApp.closeChatModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Messages Body -->
+      <div id="chatMessagesContainer" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
+
+      <!-- Quick Replies -->
+      <div class="px-4 py-2 border-t border-slate-100 flex gap-2 overflow-x-auto text-[11px]">
+        <button onclick="window.OmnexaApp.sendChatMessage('السيارة متوقفة بالمظلة الخارجية')" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">
+          السيارة بالمظلة الخارجية
+        </button>
+        <button onclick="window.OmnexaApp.sendChatMessage('المفتاح في الاستقبال')" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">
+          المفتاح في الاستقبال
+        </button>
+        <button onclick="window.OmnexaApp.sendChatMessage('أنا بانتظارك عند الباب')" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">
+          أنا بانتظارك
+        </button>
+      </div>
+
+      <!-- Chat Input Field -->
+      <div class="p-3 border-t border-slate-100 flex items-center gap-2 bg-white">
+        <input type="text" id="chatInputField" placeholder="اكتب رسالتك للكابتن..." 
+          onkeydown="if(event.key === 'Enter') { window.OmnexaApp.sendChatMessage(this.value); this.value = ''; }"
+          class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+        <button onclick="const inp = document.getElementById('chatInputField'); window.OmnexaApp.sendChatMessage(inp.value); inp.value = '';" 
+          class="w-10 h-10 rounded-xl bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center shadow-md">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Tax Invoice Receipt Modal -->
+  <div id="invoiceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center font-black text-xs">O</span>
+          <span class="font-black text-slate-900 text-base">فاتورة ضريبية مبسطة</span>
+        </div>
+        <button onclick="window.OmnexaApp.closeInvoiceModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="py-4 space-y-3 text-xs">
+        <div class="flex justify-between text-slate-500">
+          <span>المنشأة:</span>
+          <span class="font-bold text-slate-900">شركة أومنيسكا للعناية بالمركبات</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>الرقم الضريبي:</span>
+          <span class="font-mono text-slate-900">310492817200003</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>رقم الفاتورة:</span>
+          <span class="font-mono font-bold text-slate-900" id="invOrderId">#OMN-88421</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>التاريخ والوقت:</span>
+          <span class="text-slate-800" id="invDate">31 أكتوبر 2026</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>الباقة:</span>
+          <span class="font-bold text-slate-900" id="invPackage">غسيل أومنيسكا الشامل</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>السيارة:</span>
+          <span class="text-slate-800" id="invVehicle">مرسيدس E350 (أ ب ج 1234)</span>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 space-y-2">
+          <div class="flex justify-between text-slate-600">
+            <span>المبلغ الخاضع للضريبة:</span>
+            <span id="invSubtotal">89.00 ر.س</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>ضريبة القيمة المضافة (15%):</span>
+            <span id="invVat">13.35 ر.س</span>
+          </div>
+          <div class="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200">
+            <span>الإجمالي المسدد:</span>
+            <span class="text-sky-600" id="invTotal">102.35 ر.س</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4 pt-4 border-t border-slate-100">
+        <button onclick="window.print()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>طباعة الفاتورة</span>
+        </button>
+        <button onclick="window.OmnexaApp.closeInvoiceModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add New Vehicle to Garage -->
+  <div id="addVehicleModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <h3 class="font-bold text-slate-900 text-base">إضافة سيارة جديدة للجراج</h3>
+        <button onclick="document.getElementById('addVehicleModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">الشركة المصنعة (الماركة):</label>
+          <input type="text" id="newCarMake" placeholder="مثال: تويوتا، لاند روفر، لكزس" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">الموديل وسنة الصنع:</label>
+          <input type="text" id="newCarModel" placeholder="مثال: كامري 2024 أو ديفندر 2023" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">فئة وحجم السيارة:</label>
+          <select id="newCarType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800">
+            <option value="sedan">سيدان صغيرة أو متوسطة</option>
+            <option value="suv">دفع رباعي / عائلية SUV</option>
+            <option value="truck">بيك أب / شاحنة كبيرة</option>
+            <option value="luxury">سيارة فارهة / كوبيه رياضية</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">رقم اللوحة السعودية:</label>
+          <input type="text" id="newCarPlate" placeholder="مثال: د ن م 4455" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase text-slate-800">
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-6">
+        <button onclick="
+          const make = document.getElementById('newCarMake').value || 'لكزس';
+          const model = document.getElementById('newCarModel').value || 'LX600 2024';
+          const type = document.getElementById('newCarType').value || 'suv';
+          const plate = document.getElementById('newCarPlate').value || 'ق ل م 7777';
+          OMNEXA_DATA.userGarage.push({
+            id: 'car-' + Date.now(),
+            make, model, year: '2024',
+            plate_ar: plate, plate_en: plate,
+            type, color_ar: 'رمادي تيتانيوم', color_en: 'Titanium Grey',
+            is_default: false
+          });
+          document.getElementById('addVehicleModal').classList.add('hidden');
+          window.OmnexaApp.showToast('تمت إضافة السيارة لجراجك بنجاح!');
+          window.OmnexaApp.navigateTo('garage');
+        " class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition">
+          حفظ السيارة
+        </button>
+        <button onclick="document.getElementById('addVehicleModal').classList.add('hidden')" class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
